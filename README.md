@@ -13,9 +13,10 @@ controle de consentimento, pensado para atender a LGPD desde o desenho:
 - **Consulta por CPF restrita e auditada.** So usuarios internos autenticados
   (role `OPERADOR`) podem buscar um cadastro por CPF; toda consulta gera uma
   linha em `log_acesso`.
-- **Revogacao de consentimento.** Existe um endpoint para marcar o
-  consentimento como revogado e o titular como `INATIVO`, atendendo ao
-  direito de exclusao (LGPD art. 18).
+- **Revogacao de consentimento e exclusao.** Alem de revogar o consentimento
+  (titular vira `INATIVO`), ha um endpoint dedicado de exclusao
+  (`DELETE /api/titulares/{id}`, titular vira `EXCLUIDO` e some das buscas
+  por padrao), atendendo ao direito de exclusao (LGPD art. 18).
 
 ## Estrutura
 
@@ -66,19 +67,30 @@ npm start
 `/api` para `http://localhost:8080`, entao o backend precisa estar de pe
 para o formulario funcionar. Acesse `http://localhost:4200`.
 
-Tres rotas:
+Rotas:
 
-- `/` — formulario publico de autocadastro (`POST /api/titulares`).
+- `/` — formulario publico de autocadastro (`POST /api/titulares`); a
+  finalidade do cadastro e um campo livre preenchido por quem coleta os
+  dados, nao um texto fixo.
 - `/login` — tela de login (`POST /api/auth/login`), guarda o token JWT em
   `sessionStorage`.
-- `/busca` — protegida por `authGuard`; busca um titular por CPF
-  (`GET /api/titulares/{cpf}`), anexando o token via `authInterceptor`.
-  Em caso de `401` (token expirado/invalido), desloga e volta para `/login`
+- `/titulares` — protegida por `authGuard` (OPERADOR ou ADMIN); pesquisa
+  titulares por CPF/nome/cidade/status (`GET /api/titulares`), edita
+  (`PUT /api/titulares/{id}`) e exclui (`DELETE /api/titulares/{id}`, soft
+  delete para `EXCLUIDO`). Anexa o token via `authInterceptor`; em caso de
+  `401` (token expirado/invalido), desloga e volta para `/login`
   automaticamente.
+- `/usuarios` — protegida por `authGuard` + `adminGuard` (somente ADMIN);
+  cadastra, edita, desativa e filtra usuarios internos
+  (`GET/POST/PUT/DELETE /api/usuarios`).
+- `/backup` — protegida por `authGuard` + `adminGuard` (somente ADMIN);
+  exporta os titulares em CSV/Excel e restaura a partir de um arquivo no
+  mesmo layout (`/api/backup/titulares/export` e `/import`).
 
 Para testar o fluxo completo: suba o backend com `ADMIN_LOGIN`/
 `ADMIN_PASSWORD` definidos, entre em `/login` com essas credenciais, e use
-`/busca` para consultar um CPF ja cadastrado pelo formulario publico.
+`/titulares` para pesquisar um titular ja cadastrado pelo formulario
+publico.
 
 ## Hospedagem
 

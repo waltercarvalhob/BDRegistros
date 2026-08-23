@@ -2,7 +2,7 @@
   <a routerLink="/">Cadastro</a>
 
   <ng-container *ngIf="authService.isAuthenticated(); else entrar">
-    <a routerLink="/busca">Buscar</a>
+    <a routerLink="/titulares">Titulares</a>
     <ng-container *ngIf="isAdmin">
       <a routerLink="/usuarios">Usuarios</a>
       <a routerLink="/backup">Backup</a>

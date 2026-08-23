@@ -1,6 +1,7 @@
 package br.com.bdregistros.service;
 
 import br.com.bdregistros.dto.EnderecoDTO;
+import br.com.bdregistros.dto.TitularAtualizacaoRequest;
 import br.com.bdregistros.dto.TitularCadastroRequest;
 import br.com.bdregistros.exception.ConsentimentoObrigatorioException;
 import br.com.bdregistros.exception.CpfInvalidoException;
@@ -72,13 +73,56 @@ public class TitularService {
     }
 
     @Transactional(readOnly = true)
-    public Titular buscarPorCpf(String cpf, String usuarioLogado) {
-        String digits = CpfValidator.somenteDigitos(cpf);
-        Titular titular = titularRepository.findByCpfAndStatusNot(digits, StatusTitular.EXCLUIDO)
-                .orElseThrow(() -> new TitularNaoEncontradoException("Nenhum registro encontrado para este CPF."));
+    public List<Titular> listar(String cpf, String nomeCompleto, String cidade, StatusTitular status, String usuarioLogado) {
+        String cpfDigits = cpf == null ? null : CpfValidator.somenteDigitos(cpf);
+        List<Titular> resultado = titularRepository.findAll(TitularSpecifications.filtrar(cpfDigits, nomeCompleto, cidade, status));
+        resultado.forEach(titular -> registrarAcesso(titular.getId(), usuarioLogado, "CONSULTA"));
+        return resultado;
+    }
 
-        registrarAcesso(titular.getId(), usuarioLogado, "CONSULTA");
+    @Transactional(readOnly = true)
+    public Titular buscarPorId(UUID id, String usuarioLogado) {
+        Titular titular = titularRepository.findById(id)
+                .orElseThrow(() -> new TitularNaoEncontradoException("Titular nao encontrado."));
+        registrarAcesso(id, usuarioLogado, "CONSULTA");
         return titular;
+    }
+
+    @Transactional
+    public Titular atualizar(UUID id, TitularAtualizacaoRequest request, String usuarioLogado) {
+        Titular titular = titularRepository.findById(id)
+                .orElseThrow(() -> new TitularNaoEncontradoException("Titular nao encontrado."));
+
+        titular.setNomeCompleto(request.getNomeCompleto().trim());
+        titular.setTituloEleitor(request.getTituloEleitor());
+        titular.setTelefone(request.getTelefone());
+        titular.setDataNascimento(request.getDataNascimento());
+
+        Endereco endereco = titular.getEndereco();
+        if (endereco == null) {
+            endereco = new Endereco();
+            endereco.setTitular(titular);
+            titular.setEndereco(endereco);
+        }
+        EnderecoDTO enderecoDto = request.getEndereco();
+        endereco.setLogradouro(enderecoDto.getLogradouro());
+        endereco.setNumero(enderecoDto.getNumero());
+        endereco.setComplemento(enderecoDto.getComplemento());
+        endereco.setBairro(enderecoDto.getBairro());
+        endereco.setCidade(enderecoDto.getCidade());
+        endereco.setEstado(enderecoDto.getEstado().toUpperCase());
+        endereco.setCep(enderecoDto.getCep());
+
+        registrarAcesso(id, usuarioLogado, "ATUALIZACAO");
+        return titular;
+    }
+
+    @Transactional
+    public void excluir(UUID id, String usuarioLogado) {
+        Titular titular = titularRepository.findById(id)
+                .orElseThrow(() -> new TitularNaoEncontradoException("Titular nao encontrado."));
+        titular.setStatus(StatusTitular.EXCLUIDO);
+        registrarAcesso(id, usuarioLogado, "EXCLUSAO");
     }
 
     @Transactional

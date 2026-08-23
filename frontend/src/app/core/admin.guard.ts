@@ -12,7 +12,7 @@ export const adminGuard: CanActivateFn = () => {
   }
 
   if (authService.getUsuarioLogado()?.papel !== 'ADMIN') {
-    router.navigate(['/busca']);
+    router.navigate(['/titulares']);
     return false;
   }
 

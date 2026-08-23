@@ -1,0 +1,127 @@
+<div class="titulares">
+  <header>
+    <h1>Titulares</h1>
+    <span *ngIf="usuarioLogado">{{ usuarioLogado.login }} ({{ usuarioLogado.papel }})</span>
+  </header>
+
+  <form class="filtro" [formGroup]="filtroForm" (ngSubmit)="buscar()">
+    <label>
+      CPF
+      <input formControlName="cpf" type="text" inputmode="numeric" placeholder="000.000.000-00" />
+    </label>
+    <label>
+      Nome
+      <input formControlName="nomeCompleto" type="text" />
+    </label>
+    <label>
+      Cidade
+      <input formControlName="cidade" type="text" />
+    </label>
+    <label>
+      Status
+      <select formControlName="status">
+        <option value="">Todos (exceto excluidos)</option>
+        <option value="ATIVO">ATIVO</option>
+        <option value="INATIVO">INATIVO</option>
+        <option value="EXCLUIDO">EXCLUIDO</option>
+      </select>
+    </label>
+    <button type="submit" [disabled]="buscando">{{ buscando ? 'Pesquisando...' : 'Pesquisar' }}</button>
+    <a routerLink="/" class="botao-secundario">Novo cadastro</a>
+  </form>
+
+  <p class="mensagem-sucesso" *ngIf="sucesso">{{ sucesso }}</p>
+  <p class="mensagem-erro" *ngIf="erro">{{ erro }}</p>
+
+  <form class="form-titular" *ngIf="mostrarForm" [formGroup]="form" (ngSubmit)="salvar()">
+    <h2>Editar titular</h2>
+
+    <label>
+      Nome completo
+      <input formControlName="nomeCompleto" type="text" />
+    </label>
+
+    <label>
+      Titulo de eleitor (opcional)
+      <input formControlName="tituloEleitor" type="text" />
+    </label>
+
+    <label>
+      Telefone
+      <input formControlName="telefone" type="tel" />
+    </label>
+
+    <label>
+      Data de nascimento (opcional)
+      <input formControlName="dataNascimento" type="date" />
+    </label>
+
+    <fieldset>
+      <legend>Endereco</legend>
+
+      <label>
+        Logradouro
+        <input formControlName="logradouro" type="text" />
+      </label>
+      <label>
+        Numero
+        <input formControlName="numero" type="text" />
+      </label>
+      <label>
+        Complemento
+        <input formControlName="complemento" type="text" />
+      </label>
+      <label>
+        Bairro
+        <input formControlName="bairro" type="text" />
+      </label>
+      <label>
+        Cidade
+        <input formControlName="cidade" type="text" />
+      </label>
+      <label>
+        UF
+        <input formControlName="estado" type="text" maxlength="2" />
+      </label>
+      <label>
+        CEP
+        <input formControlName="cep" type="text" />
+      </label>
+    </fieldset>
+
+    <p class="mensagem-erro" *ngIf="erroForm">{{ erroForm }}</p>
+
+    <div class="acoes-form">
+      <button type="submit" [disabled]="salvando">{{ salvando ? 'Salvando...' : 'Salvar' }}</button>
+      <button type="button" (click)="cancelar()">Cancelar</button>
+    </div>
+  </form>
+
+  <table class="lista" *ngIf="titulares.length">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>CPF</th>
+        <th>Telefone</th>
+        <th>Cidade/UF</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let titular of titulares">
+        <td>{{ titular.nomeCompleto }}</td>
+        <td>{{ titular.cpf }}</td>
+        <td>{{ titular.telefone }}</td>
+        <td>{{ titular.cidade }}/{{ titular.estado }}</td>
+        <td>{{ titular.status }}</td>
+        <td class="acoes">
+          <button type="button" (click)="abrirEdicao(titular)">Editar</button>
+          <button type="button" (click)="excluir(titular)" [disabled]="titular.status === 'EXCLUIDO'">Excluir</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="jaBuscou && !buscando && !titulares.length">Nenhum titular encontrado para os filtros informados.</p>
+</div>

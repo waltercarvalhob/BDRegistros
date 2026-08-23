@@ -37,7 +37,7 @@ export class LoginComponent {
     this.authService.login({ login: login!, senha: senha! }).subscribe({
       next: () => {
         this.enviando = false;
-        this.router.navigate(['/busca']);
+        this.router.navigate(['/titulares']);
       },
       error: (resposta) => {
         this.enviando = false;

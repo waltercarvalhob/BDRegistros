@@ -16,8 +16,13 @@ public class TitularResponse {
     private String telefone;
     private LocalDate dataNascimento;
     private StatusTitular status;
+    private String logradouro;
+    private String numero;
+    private String complemento;
+    private String bairro;
     private String cidade;
     private String estado;
+    private String cep;
 
     public static TitularResponse from(Titular titular) {
         TitularResponse response = new TitularResponse();
@@ -31,8 +36,13 @@ public class TitularResponse {
 
         Endereco endereco = titular.getEndereco();
         if (endereco != null) {
+            response.logradouro = endereco.getLogradouro();
+            response.numero = endereco.getNumero();
+            response.complemento = endereco.getComplemento();
+            response.bairro = endereco.getBairro();
             response.cidade = endereco.getCidade();
             response.estado = endereco.getEstado();
+            response.cep = endereco.getCep();
         }
         return response;
     }
@@ -65,11 +75,31 @@ public class TitularResponse {
         return status;
     }
 
+    public String getLogradouro() {
+        return logradouro;
+    }
+
+    public String getNumero() {
+        return numero;
+    }
+
+    public String getComplemento() {
+        return complemento;
+    }
+
+    public String getBairro() {
+        return bairro;
+    }
+
     public String getCidade() {
         return cidade;
     }
 
     public String getEstado() {
         return estado;
+    }
+
+    public String getCep() {
+        return cep;
     }
 }

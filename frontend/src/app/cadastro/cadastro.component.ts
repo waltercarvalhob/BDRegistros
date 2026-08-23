@@ -4,8 +4,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { cpfValidator } from '../core/cpf.validator';
 import { TitularService } from '../core/titular.service';
 
-const FINALIDADE_PADRAO = 'Cadastro para Tarifa Social de Energia Eletrica / Agua';
-
 @Component({
   selector: 'app-cadastro',
   standalone: true,
@@ -21,8 +19,6 @@ export class CadastroComponent {
   sucesso = false;
   erro: string | null = null;
 
-  readonly finalidade = FINALIDADE_PADRAO;
-
   readonly form = this.fb.group({
     nomeCompleto: ['', [Validators.required, Validators.maxLength(150)]],
     cpf: ['', [Validators.required, cpfValidator()]],
@@ -36,6 +32,7 @@ export class CadastroComponent {
     cidade: ['', Validators.required],
     estado: ['', [Validators.required, Validators.maxLength(2)]],
     cep: [''],
+    finalidadeConsentimento: ['', [Validators.required, Validators.maxLength(300)]],
     canalConsentimento: ['PRESENCIAL', Validators.required],
     agenteResponsavel: [''],
     consentimentoConfirmado: [false, Validators.requiredTrue],
@@ -67,7 +64,7 @@ export class CadastroComponent {
           estado: v.estado!,
           cep: v.cep || undefined,
         },
-        finalidadeConsentimento: this.finalidade,
+        finalidadeConsentimento: v.finalidadeConsentimento!,
         canalConsentimento: v.canalConsentimento as 'PRESENCIAL' | 'DIGITAL' | 'TELEFONE',
         agenteResponsavel: v.agenteResponsavel || undefined,
         consentimentoConfirmado: !!v.consentimentoConfirmado,
