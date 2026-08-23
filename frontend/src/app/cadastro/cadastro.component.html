@@ -1,0 +1,106 @@
+<form class="cadastro" [formGroup]="form" (ngSubmit)="enviar()">
+  <h1>Cadastro</h1>
+
+  <label>
+    Nome completo
+    <input formControlName="nomeCompleto" type="text" />
+  </label>
+
+  <label>
+    CPF
+    <input formControlName="cpf" type="text" inputmode="numeric" placeholder="000.000.000-00" />
+    <span class="campo-erro" *ngIf="form.get('cpf')?.touched && form.get('cpf')?.invalid">
+      CPF invalido.
+    </span>
+  </label>
+
+  <label>
+    Titulo de eleitor (opcional)
+    <input formControlName="tituloEleitor" type="text" />
+  </label>
+
+  <label>
+    Telefone
+    <input formControlName="telefone" type="tel" placeholder="(98) 90000-0000" />
+  </label>
+
+  <label>
+    Data de nascimento (opcional)
+    <input formControlName="dataNascimento" type="date" />
+  </label>
+
+  <fieldset>
+    <legend>Endereco</legend>
+
+    <label>
+      Logradouro
+      <input formControlName="logradouro" type="text" />
+    </label>
+
+    <label>
+      Numero
+      <input formControlName="numero" type="text" />
+    </label>
+
+    <label>
+      Complemento
+      <input formControlName="complemento" type="text" />
+    </label>
+
+    <label>
+      Bairro
+      <input formControlName="bairro" type="text" />
+    </label>
+
+    <label>
+      Cidade
+      <input formControlName="cidade" type="text" />
+    </label>
+
+    <label>
+      UF
+      <input formControlName="estado" type="text" maxlength="2" />
+    </label>
+
+    <label>
+      CEP
+      <input formControlName="cep" type="text" />
+    </label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Como o cadastro esta sendo feito</legend>
+
+    <label>
+      Canal
+      <select formControlName="canalConsentimento">
+        <option value="PRESENCIAL">Presencial (agente de campo)</option>
+        <option value="DIGITAL">Digital (a propria pessoa preencheu)</option>
+        <option value="TELEFONE">Telefone</option>
+      </select>
+    </label>
+
+    <label>
+      Nome do agente responsavel (se presencial)
+      <input formControlName="agenteResponsavel" type="text" />
+    </label>
+  </fieldset>
+
+  <div class="consentimento">
+    <p>
+      Finalidade deste cadastro: <strong>{{ finalidade }}</strong>. Seus dados serao usados apenas para essa
+      finalidade e voce pode pedir a exclusao a qualquer momento.
+    </p>
+    <label class="checkbox">
+      <input formControlName="consentimentoConfirmado" type="checkbox" />
+      Declaro que fui informado(a) sobre a finalidade da coleta destes dados e autorizo o seu uso para esse fim.
+    </label>
+  </div>
+
+  <button type="submit" [disabled]="enviando">
+    {{ enviando ? 'Enviando...' : 'Confirmar cadastro' }}
+  </button>
+
+  <p class="mensagem-sucesso" *ngIf="sucesso">Cadastro realizado com sucesso.</p>
+  <p class="mensagem-erro" *ngIf="erro">{{ erro }}</p>
+</form>

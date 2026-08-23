@@ -1,0 +1,56 @@
+<div class="backup">
+  <header>
+    <h1>Backup dos titulares</h1>
+    <span *ngIf="usuarioLogado">{{ usuarioLogado.login }} ({{ usuarioLogado.papel }})</span>
+  </header>
+
+  <section class="bloco">
+    <h2>Exportar</h2>
+    <p>Gera um arquivo com todos os titulares cadastrados (nome, CPF, endereco e consentimento).</p>
+    <div class="acoes">
+      <button type="button" [disabled]="exportando" (click)="exportar('csv')">
+        {{ exportando ? 'Gerando...' : 'Exportar CSV' }}
+      </button>
+      <button type="button" [disabled]="exportando" (click)="exportar('xlsx')">
+        {{ exportando ? 'Gerando...' : 'Exportar Excel' }}
+      </button>
+    </div>
+    <p class="mensagem-erro" *ngIf="erroExportacao">{{ erroExportacao }}</p>
+  </section>
+
+  <section class="bloco">
+    <h2>Restaurar / importar</h2>
+    <p>
+      Envie um arquivo CSV ou Excel no mesmo formato do exportado. Titulares com CPF ja cadastrado sao
+      atualizados; CPFs novos sao criados (exigem os campos de consentimento preenchidos).
+    </p>
+    <div class="importar">
+      <input type="file" accept=".csv,.xlsx" (change)="selecionarArquivo($event)" />
+      <button type="button" [disabled]="!arquivoSelecionado || importando" (click)="importar()">
+        {{ importando ? 'Importando...' : 'Importar' }}
+      </button>
+    </div>
+    <p class="mensagem-erro" *ngIf="erroImportacao">{{ erroImportacao }}</p>
+
+    <div class="resultado" *ngIf="resultado">
+      <p>
+        {{ resultado.totalLinhas }} linha(s) processada(s) — {{ resultado.criados }} criado(s),
+        {{ resultado.atualizados }} atualizado(s), {{ resultado.erros.length }} erro(s).
+      </p>
+      <table class="erros" *ngIf="resultado.erros.length">
+        <thead>
+          <tr>
+            <th>Linha</th>
+            <th>Erro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let erro of resultado.erros">
+            <td>{{ erro.linha }}</td>
+            <td>{{ erro.mensagem }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

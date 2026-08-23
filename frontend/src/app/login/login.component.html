@@ -1,0 +1,19 @@
+<form class="login" [formGroup]="form" (ngSubmit)="entrar()">
+  <h1>Entrar</h1>
+
+  <label>
+    Login
+    <input formControlName="login" type="text" autocomplete="username" />
+  </label>
+
+  <label>
+    Senha
+    <input formControlName="senha" type="password" autocomplete="current-password" />
+  </label>
+
+  <button type="submit" [disabled]="enviando">
+    {{ enviando ? 'Entrando...' : 'Entrar' }}
+  </button>
+
+  <p class="mensagem-erro" *ngIf="erro">{{ erro }}</p>
+</form>

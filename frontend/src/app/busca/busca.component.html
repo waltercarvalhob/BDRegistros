@@ -1,0 +1,52 @@
+<div class="busca">
+  <header>
+    <h1>Buscar por CPF</h1>
+    <span *ngIf="usuarioLogado">{{ usuarioLogado.login }} ({{ usuarioLogado.papel }})</span>
+    <button type="button" (click)="sair()">Sair</button>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="buscar()">
+    <label>
+      CPF
+      <input formControlName="cpf" type="text" inputmode="numeric" placeholder="000.000.000-00" />
+      <span class="campo-erro" *ngIf="form.get('cpf')?.touched && form.get('cpf')?.invalid">
+        CPF invalido.
+      </span>
+    </label>
+
+    <button type="submit" [disabled]="buscando">
+      {{ buscando ? 'Buscando...' : 'Buscar' }}
+    </button>
+  </form>
+
+  <p class="mensagem-erro" *ngIf="erro">{{ erro }}</p>
+
+  <table class="resultado" *ngIf="resultado">
+    <tbody>
+      <tr>
+        <th>Nome</th>
+        <td>{{ resultado.nomeCompleto }}</td>
+      </tr>
+      <tr>
+        <th>CPF</th>
+        <td>{{ resultado.cpf }}</td>
+      </tr>
+      <tr *ngIf="resultado.tituloEleitor">
+        <th>Titulo de eleitor</th>
+        <td>{{ resultado.tituloEleitor }}</td>
+      </tr>
+      <tr *ngIf="resultado.telefone">
+        <th>Telefone</th>
+        <td>{{ resultado.telefone }}</td>
+      </tr>
+      <tr *ngIf="resultado.cidade">
+        <th>Cidade/UF</th>
+        <td>{{ resultado.cidade }}/{{ resultado.estado }}</td>
+      </tr>
+      <tr>
+        <th>Status</th>
+        <td>{{ resultado.status }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

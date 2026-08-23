@@ -1,0 +1,101 @@
+<div class="usuarios">
+  <header>
+    <h1>Usuarios internos</h1>
+    <span *ngIf="usuarioLogado">{{ usuarioLogado.login }} ({{ usuarioLogado.papel }})</span>
+  </header>
+
+  <form class="filtro" [formGroup]="filtroForm" (ngSubmit)="buscar()">
+    <label>
+      Login
+      <input formControlName="login" type="text" />
+    </label>
+    <label>
+      Nome
+      <input formControlName="nomeCompleto" type="text" />
+    </label>
+    <label>
+      Papel
+      <select formControlName="papel">
+        <option value="">Todos</option>
+        <option value="ADMIN">ADMIN</option>
+        <option value="OPERADOR">OPERADOR</option>
+      </select>
+    </label>
+    <label>
+      Situacao
+      <select formControlName="ativo">
+        <option value="">Todos</option>
+        <option value="true">Ativos</option>
+        <option value="false">Desativados</option>
+      </select>
+    </label>
+    <button type="submit" [disabled]="carregando">Filtrar</button>
+    <button type="button" (click)="abrirNovo()">Novo usuario</button>
+  </form>
+
+  <p class="mensagem-sucesso" *ngIf="sucesso">{{ sucesso }}</p>
+  <p class="mensagem-erro" *ngIf="erro">{{ erro }}</p>
+
+  <form class="form-usuario" *ngIf="mostrarForm" [formGroup]="form" (ngSubmit)="salvar()">
+    <h2>{{ editando ? 'Editar usuario' : 'Novo usuario' }}</h2>
+
+    <label>
+      Login
+      <input formControlName="login" type="text" />
+    </label>
+
+    <label>
+      Nome completo
+      <input formControlName="nomeCompleto" type="text" />
+    </label>
+
+    <label>
+      Papel
+      <select formControlName="papel">
+        <option value="ADMIN">ADMIN</option>
+        <option value="OPERADOR">OPERADOR</option>
+      </select>
+    </label>
+
+    <label>
+      {{ editando ? 'Nova senha (opcional)' : 'Senha' }}
+      <input formControlName="senha" type="password" placeholder="Minimo 8 caracteres" />
+      <span class="campo-erro" *ngIf="form.get('senha')?.touched && form.get('senha')?.invalid">
+        A senha deve ter pelo menos 8 caracteres.
+      </span>
+    </label>
+
+    <p class="mensagem-erro" *ngIf="erroForm">{{ erroForm }}</p>
+
+    <div class="acoes-form">
+      <button type="submit" [disabled]="salvando">{{ salvando ? 'Salvando...' : 'Salvar' }}</button>
+      <button type="button" (click)="cancelar()">Cancelar</button>
+    </div>
+  </form>
+
+  <table class="lista" *ngIf="usuarios.length">
+    <thead>
+      <tr>
+        <th>Login</th>
+        <th>Nome</th>
+        <th>Papel</th>
+        <th>Situacao</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let usuario of usuarios">
+        <td>{{ usuario.login }}</td>
+        <td>{{ usuario.nomeCompleto }}</td>
+        <td>{{ usuario.papel }}</td>
+        <td>{{ usuario.ativo ? 'Ativo' : 'Desativado' }}</td>
+        <td class="acoes">
+          <button type="button" (click)="abrirEdicao(usuario)">Editar</button>
+          <button type="button" (click)="desativar(usuario)" [disabled]="!usuario.ativo">Desativar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!carregando && !usuarios.length">Nenhum usuario encontrado.</p>
+</div>

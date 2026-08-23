@@ -1,0 +1,17 @@
+<nav class="nav">
+  <a routerLink="/">Cadastro</a>
+
+  <ng-container *ngIf="authService.isAuthenticated(); else entrar">
+    <a routerLink="/busca">Buscar</a>
+    <ng-container *ngIf="isAdmin">
+      <a routerLink="/usuarios">Usuarios</a>
+      <a routerLink="/backup">Backup</a>
+    </ng-container>
+    <button type="button" (click)="sair()">Sair</button>
+  </ng-container>
+  <ng-template #entrar>
+    <a routerLink="/login">Entrar</a>
+  </ng-template>
+</nav>
+
+<router-outlet></router-outlet>
