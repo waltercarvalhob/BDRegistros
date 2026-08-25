@@ -46,11 +46,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "/api/titulares").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                .requestMatchers("/api/**").authenticated()
-                // Fora de /api/**: arquivos estaticos do frontend (quando
-                // empacotado no mesmo servico, ver pom.xml/bundle-frontend)
-                // e as rotas client-side da SPA; nao ha dado sensivel aqui.
-                .anyRequest().permitAll()
+                .requestMatchers(HttpMethod.GET, "/health").permitAll()
+                .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

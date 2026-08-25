@@ -102,27 +102,36 @@ publico.
 
 ## Hospedagem (Render)
 
-O projeto esta hospedado no Render como um unico servico web: o build do
-Maven empacota o frontend Angular dentro do jar do backend (servido em
-`static/`), entao um so servico serve API + interface.
+O projeto e hospedado no Render como dois servicos separados, descritos em
+`render.yaml` na raiz (usado como referencia/Blueprint):
 
+- **Backend** (`bdregistros-backend`): servico Web com `runtime: docker`,
+  construido a partir de `backend/Dockerfile` (multi-stage: build com Maven
+  + imagem final so com o JRE). Expoe `GET /health` sem autenticacao,
+  usado como `healthCheckPath` pelo Render.
+- **Frontend** (`bdregistros-frontend`): Static Site (`npm install && npm
+  run build`, publica `dist/bdregistros/browser`). O `render.yaml`
+  configura dois rewrites: `/api/*` para a URL publica do backend, e
+  `/*` para `/index.html` (necessario para as rotas client-side do
+  Angular Router funcionarem em recarregamento direto).
 - **Banco de dados:** Postgres gerenciado no Render.
-- **Backend + Frontend:** um servico Web no Render, conectado ao
-  repositorio do GitHub com deploy automatico a cada push no `master`.
-  O comando de build (`mvn clean package` ou equivalente) ja aciona o
-  build do Angular automaticamente: o profile Maven `bundle-frontend`
-  (backend/pom.xml) so e ativado quando a variavel de ambiente `RENDER`
-  esta definida — o Render define isso sozinho no ambiente de build, entao
-  nada precisa ser configurado manualmente para isso. Localmente
-  (`mvn spring-boot:run`) esse profile fica inativo, para nao atrasar o
-  ciclo de desenvolvimento.
-- Variaveis de ambiente que o servico do Render precisa ter configuradas
-  (alem de `JWT_SECRET` e `FRONTEND_ORIGIN` ja documentados acima):
-  - `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`: dados do
-    Postgres gerenciado do Render (a URL do banco deixou de ser fixa em
-    `localhost`; sem essas variaveis o deploy nao consegue conectar).
-  - `FRONTEND_ORIGIN`: no Render, aponta para a propria URL publica do
-    servico (mesma origem servindo API e frontend).
+
+Variaveis de ambiente do servico de backend (alem de `JWT_SECRET` e
+`FRONTEND_ORIGIN` ja documentados acima):
+
+- `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`: dados do
+  Postgres gerenciado do Render (a URL do banco deixou de ser fixa em
+  `localhost`; sem essas variaveis o deploy nao consegue conectar).
+- `ADMIN_LOGIN`, `ADMIN_PASSWORD`: bootstrap do primeiro administrador
+  (so tem efeito se a tabela `usuario` estiver vazia).
+- `FRONTEND_ORIGIN`: URL publica do servico de frontend (Static Site),
+  para o CORS aceitar as chamadas de `/api/**`.
+
+Se os servicos ja existirem no Render conectados a outro repositorio,
+repita o repositorio conectado (Settings > Build & Deploy) para
+`waltercarvalhob/BDRegistros` em ambos, e confira se o "Publish Directory"
+do Static Site aponta para `dist/bdregistros/browser` (o nome do projeto
+Angular aqui e `bdregistros`, definido em `frontend/angular.json`).
 
 Antes de publicar de verdade: revisar politica de retencao (quando um
 titular deixa de ser beneficiario, os dados devem ser anonimizados ou
