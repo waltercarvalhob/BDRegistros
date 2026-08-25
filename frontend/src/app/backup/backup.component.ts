@@ -55,22 +55,37 @@ export class BackupComponent {
     this.erroImportacao = null;
   }
 
-  importar(): void {
+  visualizar(): void {
+    this.executarImportacao(true);
+  }
+
+  confirmar(): void {
+    this.executarImportacao(false);
+  }
+
+  cancelarPreVisualizacao(): void {
+    this.resultado = null;
+  }
+
+  private executarImportacao(dryRun: boolean): void {
     if (!this.arquivoSelecionado) {
       return;
     }
 
     this.importando = true;
     this.erroImportacao = null;
-    this.resultado = null;
 
-    this.backupService.importar(this.arquivoSelecionado).subscribe({
+    this.backupService.importar(this.arquivoSelecionado, undefined, dryRun).subscribe({
       next: (resultado) => {
         this.importando = false;
         this.resultado = resultado;
+        if (!dryRun) {
+          this.arquivoSelecionado = null;
+        }
       },
       error: (resposta) => {
         this.importando = false;
+        this.resultado = null;
         if (resposta?.status === 401) {
           this.authService.logout();
           this.router.navigate(['/login']);

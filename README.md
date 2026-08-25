@@ -85,7 +85,11 @@ Rotas:
   (`GET/POST/PUT/DELETE /api/usuarios`).
 - `/backup` — protegida por `authGuard` + `adminGuard` (somente ADMIN);
   exporta os titulares em CSV/Excel e restaura a partir de um arquivo no
-  mesmo layout (`/api/backup/titulares/export` e `/import`).
+  mesmo layout (`/api/backup/titulares/export` e `/import`). A importacao
+  tem uma etapa de pre-visualizacao: `/import?dryRun=true` roda a mesma
+  validacao/upsert de cada linha, mas a transacao de cada linha e desfeita
+  no final (nada e gravado); so ao confirmar a tela reenvia o mesmo arquivo
+  com `dryRun=false` para gravar de fato.
 
 Para testar o fluxo completo: suba o backend com `ADMIN_LOGIN`/
 `ADMIN_PASSWORD` definidos, entre em `/login` com essas credenciais, e use

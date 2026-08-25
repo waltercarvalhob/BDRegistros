@@ -63,8 +63,9 @@ public class BackupController {
     @PostMapping("/import")
     public ResponseEntity<ImportResultadoResponse> importar(@RequestPart("file") MultipartFile file,
                                                               @RequestParam(required = false) String formato,
+                                                              @RequestParam(defaultValue = "false") boolean dryRun,
                                                               Principal principal) {
-        ImportResultadoResponse resultado = importService.importar(file, formato, principal.getName());
+        ImportResultadoResponse resultado = importService.importar(file, formato, principal.getName(), dryRun);
         return ResponseEntity.ok(resultado);
     }
 }

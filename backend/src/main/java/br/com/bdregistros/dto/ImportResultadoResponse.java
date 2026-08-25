@@ -8,12 +8,14 @@ public class ImportResultadoResponse {
     private final int criados;
     private final int atualizados;
     private final List<ImportErroResponse> erros;
+    private final boolean dryRun;
 
-    public ImportResultadoResponse(int totalLinhas, int criados, int atualizados, List<ImportErroResponse> erros) {
+    public ImportResultadoResponse(int totalLinhas, int criados, int atualizados, List<ImportErroResponse> erros, boolean dryRun) {
         this.totalLinhas = totalLinhas;
         this.criados = criados;
         this.atualizados = atualizados;
         this.erros = erros;
+        this.dryRun = dryRun;
     }
 
     public int getTotalLinhas() {
@@ -30,5 +32,9 @@ public class ImportResultadoResponse {
 
     public List<ImportErroResponse> getErros() {
         return erros;
+    }
+
+    public boolean isDryRun() {
+        return dryRun;
     }
 }

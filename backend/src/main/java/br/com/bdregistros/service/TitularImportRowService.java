@@ -16,6 +16,7 @@ import br.com.bdregistros.util.CpfValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,7 +26,12 @@ import java.util.Optional;
 /**
  * Processa uma linha do arquivo de restauracao em sua propria transacao
  * (REQUIRES_NEW), para que uma linha invalida nao desfaca as linhas ja
- * processadas com sucesso no mesmo lote.
+ * processadas com sucesso no mesmo lote. Em modo dryRun (pre-visualizacao),
+ * a mesma validacao/upsert roda normalmente, mas a transacao da linha e
+ * marcada para rollback no final, entao nada e gravado. O flush() antes do
+ * rollback e essencial: sem ele o Hibernate so tentaria de fato o INSERT/UPDATE
+ * no banco no commit, entao violacoes de restricao do banco (ex.: tamanho de
+ * coluna) so apareceriam na confirmacao real, nunca na pre-visualizacao.
  */
 @Service
 public class TitularImportRowService {
@@ -48,22 +54,33 @@ public class TitularImportRowService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Resultado processarLinha(Map<String, String> valores, String usuarioLogado) {
+    public Resultado processarLinha(Map<String, String> valores, String usuarioLogado, boolean dryRun) {
         String cpf = CpfValidator.somenteDigitos(valor(valores, "cpf"));
         if (!CpfValidator.isValid(cpf)) {
             throw new CpfInvalidoException("CPF invalido: " + valor(valores, "cpf"));
         }
 
         Optional<Titular> existente = titularRepository.findByCpf(cpf);
+        Resultado resultado;
         if (existente.isPresent()) {
             atualizar(existente.get(), valores);
-            registrarAcesso(existente.get().getId(), usuarioLogado, "IMPORTACAO_ATUALIZACAO");
-            return Resultado.ATUALIZADO;
+            if (!dryRun) {
+                registrarAcesso(existente.get().getId(), usuarioLogado, "IMPORTACAO_ATUALIZACAO");
+            }
+            resultado = Resultado.ATUALIZADO;
+        } else {
+            Titular titular = criar(cpf, valores);
+            if (!dryRun) {
+                registrarAcesso(titular.getId(), usuarioLogado, "IMPORTACAO_CRIACAO");
+            }
+            resultado = Resultado.CRIADO;
         }
 
-        Titular titular = criar(cpf, valores);
-        registrarAcesso(titular.getId(), usuarioLogado, "IMPORTACAO_CRIACAO");
-        return Resultado.CRIADO;
+        if (dryRun) {
+            titularRepository.flush();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+        return resultado;
     }
 
     private Titular criar(String cpf, Map<String, String> valores) {

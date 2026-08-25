@@ -26,17 +26,30 @@
     </p>
     <div class="importar">
       <input type="file" accept=".csv,.xlsx" (change)="selecionarArquivo($event)" />
-      <button type="button" [disabled]="!arquivoSelecionado || importando" (click)="importar()">
-        {{ importando ? 'Importando...' : 'Importar' }}
+      <button type="button" [disabled]="!arquivoSelecionado || importando" (click)="visualizar()">
+        {{ importando ? 'Analisando...' : 'Pre-visualizar' }}
       </button>
     </div>
     <p class="mensagem-erro" *ngIf="erroImportacao">{{ erroImportacao }}</p>
 
     <div class="resultado" *ngIf="resultado">
-      <p>
-        {{ resultado.totalLinhas }} linha(s) processada(s) — {{ resultado.criados }} criado(s),
-        {{ resultado.atualizados }} atualizado(s), {{ resultado.erros.length }} erro(s).
+      <p *ngIf="resultado.dryRun">
+        Pre-visualizacao: {{ resultado.totalLinhas }} linha(s) analisada(s) — {{ resultado.criados }} seria(m)
+        criado(s), {{ resultado.atualizados }} seria(m) atualizado(s), {{ resultado.erros.length }} erro(s).
+        Nada foi gravado ainda.
       </p>
+      <p *ngIf="!resultado.dryRun">
+        Importacao concluida: {{ resultado.totalLinhas }} linha(s) processada(s) — {{ resultado.criados }}
+        criado(s), {{ resultado.atualizados }} atualizado(s), {{ resultado.erros.length }} erro(s).
+      </p>
+
+      <div class="acoes" *ngIf="resultado.dryRun">
+        <button type="button" [disabled]="importando" (click)="confirmar()">
+          {{ importando ? 'Importando...' : 'Confirmar importacao' }}
+        </button>
+        <button type="button" [disabled]="importando" (click)="cancelarPreVisualizacao()">Cancelar</button>
+      </div>
+
       <table class="erros" *ngIf="resultado.erros.length">
         <thead>
           <tr>

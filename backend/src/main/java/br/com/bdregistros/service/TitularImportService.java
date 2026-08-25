@@ -40,7 +40,7 @@ public class TitularImportService {
         this.rowService = rowService;
     }
 
-    public ImportResultadoResponse importar(MultipartFile file, String formatoParam, String usuarioLogado) {
+    public ImportResultadoResponse importar(MultipartFile file, String formatoParam, String usuarioLogado, boolean dryRun) {
         String formato = resolverFormato(file, formatoParam);
         List<LinhaImportacao> linhas = "csv".equals(formato) ? lerCsv(file) : lerXlsx(file);
 
@@ -50,7 +50,7 @@ public class TitularImportService {
 
         for (LinhaImportacao linha : linhas) {
             try {
-                TitularImportRowService.Resultado resultado = rowService.processarLinha(linha.valores(), usuarioLogado);
+                TitularImportRowService.Resultado resultado = rowService.processarLinha(linha.valores(), usuarioLogado, dryRun);
                 if (resultado == TitularImportRowService.Resultado.CRIADO) {
                     criados++;
                 } else {
@@ -61,7 +61,7 @@ public class TitularImportService {
             }
         }
 
-        return new ImportResultadoResponse(linhas.size(), criados, atualizados, erros);
+        return new ImportResultadoResponse(linhas.size(), criados, atualizados, erros, dryRun);
     }
 
     private String resolverFormato(MultipartFile file, String formatoParam) {

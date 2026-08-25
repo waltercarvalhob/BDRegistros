@@ -14,6 +14,7 @@ export interface ImportResultado {
   criados: number;
   atualizados: number;
   erros: ImportErro[];
+  dryRun: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -29,12 +30,13 @@ export class BackupService {
     });
   }
 
-  importar(file: File, formato?: FormatoBackup): Observable<ImportResultado> {
+  importar(file: File, formato?: FormatoBackup, dryRun = false): Observable<ImportResultado> {
     const formData = new FormData();
     formData.append('file', file);
     if (formato) {
       formData.append('formato', formato);
     }
+    formData.append('dryRun', String(dryRun));
     return this.http.post<ImportResultado>(`${this.baseUrl}/import`, formData);
   }
 }
