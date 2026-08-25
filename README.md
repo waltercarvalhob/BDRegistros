@@ -74,12 +74,16 @@ Rotas:
   dados, nao um texto fixo.
 - `/login` — tela de login (`POST /api/auth/login`), guarda o token JWT em
   `sessionStorage`.
-- `/titulares` — protegida por `authGuard` (OPERADOR ou ADMIN); pesquisa
-  titulares por CPF/nome/cidade/status (`GET /api/titulares`), edita
-  (`PUT /api/titulares/{id}`) e exclui (`DELETE /api/titulares/{id}`, soft
-  delete para `EXCLUIDO`). Anexa o token via `authInterceptor`; em caso de
-  `401` (token expirado/invalido), desloga e volta para `/login`
-  automaticamente.
+- `/titulares` — protegida por `authGuard` (OPERADOR ou ADMIN); busca a
+  lista automaticamente ao abrir a tela (sem exigir filtro) e pesquisa por
+  CPF/nome/cidade/titulo de eleitor/status (`GET /api/titulares`, paginado
+  — `page`/`size`, 20 por pagina por padrao), edita (`PUT
+  /api/titulares/{id}`) e exclui (`DELETE /api/titulares/{id}`, soft
+  delete para `EXCLUIDO`). Usuarios ADMIN tambem veem um botao "Importar
+  arquivo" nessa tela, que reaproveita o mesmo fluxo de importacao com
+  pre-visualizacao da tela Backup (`/api/backup/titulares/import`). Anexa
+  o token via `authInterceptor`; em caso de `401` (token expirado/
+  invalido), desloga e volta para `/login` automaticamente.
 - `/usuarios` — protegida por `authGuard` + `adminGuard` (somente ADMIN);
   cadastra, edita, desativa e filtra usuarios internos
   (`GET/POST/PUT/DELETE /api/usuarios`).
@@ -96,15 +100,29 @@ Para testar o fluxo completo: suba o backend com `ADMIN_LOGIN`/
 `/titulares` para pesquisar um titular ja cadastrado pelo formulario
 publico.
 
-## Hospedagem
+## Hospedagem (Render)
 
-Para manter tudo responsivo e acessivel de qualquer dispositivo sem apps
-nativos, hospedar como aplicacao web:
+O projeto esta hospedado no Render como um unico servico web: o build do
+Maven empacota o frontend Angular dentro do jar do backend (servido em
+`static/`), entao um so servico serve API + interface.
 
-- **Banco de dados:** Postgres gerenciado (ex.: Render, Railway, Supabase).
-- **Backend:** o mesmo tipo de servico web usado no clamAtiradores-spring.
-- **Frontend:** build estatico (`ng build`) servido por um static site host,
-  ou empacotado dentro do backend em `src/main/resources/static`.
+- **Banco de dados:** Postgres gerenciado no Render.
+- **Backend + Frontend:** um servico Web no Render, conectado ao
+  repositorio do GitHub com deploy automatico a cada push no `master`.
+  O comando de build (`mvn clean package` ou equivalente) ja aciona o
+  build do Angular automaticamente: o profile Maven `bundle-frontend`
+  (backend/pom.xml) so e ativado quando a variavel de ambiente `RENDER`
+  esta definida — o Render define isso sozinho no ambiente de build, entao
+  nada precisa ser configurado manualmente para isso. Localmente
+  (`mvn spring-boot:run`) esse profile fica inativo, para nao atrasar o
+  ciclo de desenvolvimento.
+- Variaveis de ambiente que o servico do Render precisa ter configuradas
+  (alem de `JWT_SECRET` e `FRONTEND_ORIGIN` ja documentados acima):
+  - `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`: dados do
+    Postgres gerenciado do Render (a URL do banco deixou de ser fixa em
+    `localhost`; sem essas variaveis o deploy nao consegue conectar).
+  - `FRONTEND_ORIGIN`: no Render, aponta para a propria URL publica do
+    servico (mesma origem servindo API e frontend).
 
 Antes de publicar de verdade: revisar politica de retencao (quando um
 titular deixa de ser beneficiario, os dados devem ser anonimizados ou

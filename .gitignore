@@ -6,3 +6,5 @@ backend/target/
 *.iml
 .DS_Store
 Thumbs.db
+
+.jwt_secret_dev

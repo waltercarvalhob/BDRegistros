@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth.service';
+import { BackupService, ImportResultado } from '../core/backup.service';
 import { StatusTitular, TitularFiltro, TitularResponse, TitularService } from '../core/titular.service';
 
 @Component({
@@ -12,9 +13,10 @@ import { StatusTitular, TitularFiltro, TitularResponse, TitularService } from '.
   templateUrl: './titulares.component.html',
   styleUrl: './titulares.component.scss',
 })
-export class TitularesComponent {
+export class TitularesComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly titularService = inject(TitularService);
+  private readonly backupService = inject(BackupService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
@@ -23,6 +25,17 @@ export class TitularesComponent {
   jaBuscou = false;
   erro: string | null = null;
   sucesso: string | null = null;
+
+  readonly tamanhoPagina = 20;
+  pagina = 0;
+  totalPaginas = 0;
+  totalElementos = 0;
+
+  mostrarImportacao = false;
+  arquivoSelecionado: File | null = null;
+  importando = false;
+  erroImportacao: string | null = null;
+  resultadoImportacao: ImportResultado | null = null;
 
   mostrarForm = false;
   editando: TitularResponse | null = null;
@@ -35,6 +48,7 @@ export class TitularesComponent {
     cpf: [''],
     nomeCompleto: [''],
     cidade: [''],
+    tituloEleitor: [''],
     status: [''],
   });
 
@@ -52,26 +66,44 @@ export class TitularesComponent {
     cep: [''],
   });
 
+  ngOnInit(): void {
+    this.buscar();
+  }
+
   buscar(): void {
+    this.pagina = 0;
+    this.executarBusca();
+  }
+
+  irParaPagina(pagina: number): void {
+    if (pagina < 0 || pagina >= this.totalPaginas || pagina === this.pagina) {
+      return;
+    }
+    this.pagina = pagina;
+    this.executarBusca();
+  }
+
+  private executarBusca(): void {
     const v = this.filtroForm.getRawValue();
     const filtro: TitularFiltro = {
       cpf: v.cpf || undefined,
       nomeCompleto: v.nomeCompleto || undefined,
       cidade: v.cidade || undefined,
+      tituloEleitor: v.tituloEleitor || undefined,
       status: (v.status || undefined) as StatusTitular | undefined,
+      page: this.pagina,
+      size: this.tamanhoPagina,
     };
-
-    if (!filtro.cpf && !filtro.nomeCompleto && !filtro.cidade && !filtro.status) {
-      this.erro = 'Preencha ao menos um filtro (CPF, nome, cidade ou status) para pesquisar.';
-      return;
-    }
 
     this.buscando = true;
     this.erro = null;
 
     this.titularService.listar(filtro).subscribe({
       next: (resposta) => {
-        this.titulares = resposta;
+        this.titulares = resposta.content;
+        this.totalPaginas = resposta.totalPages;
+        this.totalElementos = resposta.totalElements;
+        this.pagina = resposta.number;
         this.buscando = false;
         this.jaBuscou = true;
       },
@@ -156,6 +188,61 @@ export class TitularesComponent {
         this.buscar();
       },
       error: (resposta) => this.tratarErroSessao(resposta, (mensagem) => (this.erro = mensagem)),
+    });
+  }
+
+  abrirImportacao(): void {
+    this.mostrarImportacao = true;
+    this.arquivoSelecionado = null;
+    this.resultadoImportacao = null;
+    this.erroImportacao = null;
+  }
+
+  fecharImportacao(): void {
+    this.mostrarImportacao = false;
+    this.arquivoSelecionado = null;
+    this.resultadoImportacao = null;
+    this.erroImportacao = null;
+  }
+
+  selecionarArquivo(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.arquivoSelecionado = input.files?.[0] ?? null;
+    this.resultadoImportacao = null;
+    this.erroImportacao = null;
+  }
+
+  visualizarImportacao(): void {
+    this.executarImportacao(true);
+  }
+
+  confirmarImportacao(): void {
+    this.executarImportacao(false);
+  }
+
+  private executarImportacao(dryRun: boolean): void {
+    if (!this.arquivoSelecionado) {
+      return;
+    }
+
+    this.importando = true;
+    this.erroImportacao = null;
+
+    this.backupService.importar(this.arquivoSelecionado, undefined, dryRun).subscribe({
+      next: (resultado) => {
+        this.importando = false;
+        this.resultadoImportacao = resultado;
+        if (!dryRun) {
+          this.arquivoSelecionado = null;
+          this.sucesso = 'Importacao concluida com sucesso.';
+          this.buscar();
+        }
+      },
+      error: (resposta) => {
+        this.importando = false;
+        this.resultadoImportacao = null;
+        this.tratarErroSessao(resposta, (mensagem) => (this.erroImportacao = mensagem));
+      },
     });
   }
 

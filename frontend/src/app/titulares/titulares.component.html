@@ -18,6 +18,10 @@
       <input formControlName="cidade" type="text" />
     </label>
     <label>
+      Titulo de eleitor
+      <input formControlName="tituloEleitor" type="text" />
+    </label>
+    <label>
       Status
       <select formControlName="status">
         <option value="">Todos (exceto excluidos)</option>
@@ -28,10 +32,63 @@
     </label>
     <button type="submit" [disabled]="buscando">{{ buscando ? 'Pesquisando...' : 'Pesquisar' }}</button>
     <a routerLink="/" class="botao-secundario">Novo cadastro</a>
+    <button type="button" *ngIf="usuarioLogado?.papel === 'ADMIN'" (click)="abrirImportacao()">
+      Importar arquivo
+    </button>
   </form>
 
   <p class="mensagem-sucesso" *ngIf="sucesso">{{ sucesso }}</p>
   <p class="mensagem-erro" *ngIf="erro">{{ erro }}</p>
+
+  <section class="importacao" *ngIf="mostrarImportacao">
+    <h2>Importar titulares de um arquivo</h2>
+    <p>
+      Envie um arquivo CSV ou Excel no mesmo formato do exportado em Backup. Titulares com CPF ja
+      cadastrado sao atualizados; CPFs novos sao criados.
+    </p>
+    <div class="importar">
+      <input type="file" accept=".csv,.xlsx" (change)="selecionarArquivo($event)" />
+      <button type="button" [disabled]="!arquivoSelecionado || importando" (click)="visualizarImportacao()">
+        {{ importando ? 'Analisando...' : 'Pre-visualizar' }}
+      </button>
+      <button type="button" [disabled]="importando" (click)="fecharImportacao()">Fechar</button>
+    </div>
+    <p class="mensagem-erro" *ngIf="erroImportacao">{{ erroImportacao }}</p>
+
+    <div class="resultado" *ngIf="resultadoImportacao">
+      <p *ngIf="resultadoImportacao.dryRun">
+        Pre-visualizacao: {{ resultadoImportacao.totalLinhas }} linha(s) analisada(s) —
+        {{ resultadoImportacao.criados }} seria(m) criado(s), {{ resultadoImportacao.atualizados }}
+        seria(m) atualizado(s), {{ resultadoImportacao.erros.length }} erro(s). Nada foi gravado ainda.
+      </p>
+      <p *ngIf="!resultadoImportacao.dryRun">
+        Importacao concluida: {{ resultadoImportacao.totalLinhas }} linha(s) processada(s) —
+        {{ resultadoImportacao.criados }} criado(s), {{ resultadoImportacao.atualizados }} atualizado(s),
+        {{ resultadoImportacao.erros.length }} erro(s).
+      </p>
+
+      <div class="acoes" *ngIf="resultadoImportacao.dryRun">
+        <button type="button" [disabled]="importando" (click)="confirmarImportacao()">
+          {{ importando ? 'Importando...' : 'Confirmar importacao' }}
+        </button>
+      </div>
+
+      <table class="erros" *ngIf="resultadoImportacao.erros.length">
+        <thead>
+          <tr>
+            <th>Linha</th>
+            <th>Erro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let erro of resultadoImportacao.erros">
+            <td>{{ erro.linha }}</td>
+            <td>{{ erro.mensagem }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
   <form class="form-titular" *ngIf="mostrarForm" [formGroup]="form" (ngSubmit)="salvar()">
     <h2>Editar titular</h2>
@@ -102,6 +159,7 @@
       <tr>
         <th>Nome</th>
         <th>CPF</th>
+        <th>Titulo de eleitor</th>
         <th>Telefone</th>
         <th>Cidade/UF</th>
         <th>Status</th>
@@ -112,6 +170,7 @@
       <tr *ngFor="let titular of titulares">
         <td>{{ titular.nomeCompleto }}</td>
         <td>{{ titular.cpf }}</td>
+        <td>{{ titular.tituloEleitor || '-' }}</td>
         <td>{{ titular.telefone }}</td>
         <td>{{ titular.cidade }}/{{ titular.estado }}</td>
         <td>{{ titular.status }}</td>
@@ -124,4 +183,10 @@
   </table>
 
   <p *ngIf="jaBuscou && !buscando && !titulares.length">Nenhum titular encontrado para os filtros informados.</p>
+
+  <nav class="paginacao" *ngIf="totalPaginas > 1">
+    <button type="button" [disabled]="pagina === 0 || buscando" (click)="irParaPagina(pagina - 1)">Anterior</button>
+    <span>Pagina {{ pagina + 1 }} de {{ totalPaginas }} ({{ totalElementos }} titular(es))</span>
+    <button type="button" [disabled]="pagina >= totalPaginas - 1 || buscando" (click)="irParaPagina(pagina + 1)">Proxima</button>
+  </nav>
 </div>

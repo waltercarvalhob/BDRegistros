@@ -98,4 +98,89 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!--
+      Empacota o build de producao do Angular (frontend/) dentro do jar do
+      backend, em static/, para o Render servir tudo com um unico servico
+      web. Ativado automaticamente pela variavel RENDER=true que o proprio
+      Render define no ambiente de build; localmente (mvn spring-boot:run /
+      mvn package sem essa variavel) o frontend nao e reconstruido, para nao
+      atrasar o ciclo de desenvolvimento.
+    -->
+    <profile>
+      <id>bundle-frontend</id>
+      <activation>
+        <property>
+          <name>env.RENDER</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.github.eirslett</groupId>
+            <artifactId>frontend-maven-plugin</artifactId>
+            <version>1.15.1</version>
+            <configuration>
+              <workingDirectory>${project.basedir}/../frontend</workingDirectory>
+              <installDirectory>${project.build.directory}/frontend-tools</installDirectory>
+            </configuration>
+            <executions>
+              <execution>
+                <id>install-node-and-npm</id>
+                <goals>
+                  <goal>install-node-and-npm</goal>
+                </goals>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <nodeVersion>v20.17.0</nodeVersion>
+                </configuration>
+              </execution>
+              <execution>
+                <id>npm-install</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <arguments>ci</arguments>
+                </configuration>
+              </execution>
+              <execution>
+                <id>npm-build</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <arguments>run build</arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-frontend-build</id>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <phase>process-resources</phase>
+                <configuration>
+                  <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${project.basedir}/../frontend/dist/bdregistros/browser</directory>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

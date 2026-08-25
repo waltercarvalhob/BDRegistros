@@ -7,6 +7,10 @@ import br.com.bdregistros.model.StatusTitular;
 import br.com.bdregistros.model.Titular;
 import br.com.bdregistros.service.TitularService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -51,14 +54,18 @@ public class TitularController {
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
-    public ResponseEntity<List<TitularResponse>> listar(@RequestParam(required = false) String cpf,
+    public ResponseEntity<Page<TitularResponse>> listar(@RequestParam(required = false) String cpf,
                                                           @RequestParam(required = false) String nomeCompleto,
                                                           @RequestParam(required = false) String cidade,
+                                                          @RequestParam(required = false) String tituloEleitor,
                                                           @RequestParam(required = false) StatusTitular status,
+                                                          @RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "20") int size,
                                                           Principal principal) {
-        List<TitularResponse> resultado = titularService.listar(cpf, nomeCompleto, cidade, status, principal.getName()).stream()
-                .map(TitularResponse::from)
-                .toList();
+        Pageable pageable = PageRequest.of(page, Math.min(size, 100), Sort.by("nomeCompleto"));
+        Page<TitularResponse> resultado = titularService
+                .listar(cpf, nomeCompleto, cidade, tituloEleitor, status, pageable, principal.getName())
+                .map(TitularResponse::from);
         return ResponseEntity.ok(resultado);
     }
 

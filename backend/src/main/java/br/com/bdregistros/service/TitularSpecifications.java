@@ -14,7 +14,7 @@ public final class TitularSpecifications {
      * Sem filtro de status explicito, titulares EXCLUIDO ficam de fora por
      * padrao (mesmo criterio que ja era usado na consulta por CPF).
      */
-    public static Specification<Titular> filtrar(String cpf, String nomeCompleto, String cidade, StatusTitular status) {
+    public static Specification<Titular> filtrar(String cpf, String nomeCompleto, String cidade, String tituloEleitor, StatusTitular status) {
         return (root, query, cb) -> {
             var predicate = cb.conjunction();
             if (cpf != null && !cpf.isBlank()) {
@@ -22,6 +22,9 @@ public final class TitularSpecifications {
             }
             if (nomeCompleto != null && !nomeCompleto.isBlank()) {
                 predicate = cb.and(predicate, cb.like(cb.lower(root.get("nomeCompleto")), "%" + nomeCompleto.toLowerCase() + "%"));
+            }
+            if (tituloEleitor != null && !tituloEleitor.isBlank()) {
+                predicate = cb.and(predicate, cb.like(root.get("tituloEleitor"), "%" + tituloEleitor + "%"));
             }
             if (cidade != null && !cidade.isBlank()) {
                 var endereco = root.join("endereco", JoinType.LEFT);

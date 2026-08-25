@@ -16,6 +16,8 @@ import br.com.bdregistros.repository.ConsentimentoRepository;
 import br.com.bdregistros.repository.LogAcessoRepository;
 import br.com.bdregistros.repository.TitularRepository;
 import br.com.bdregistros.util.CpfValidator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,9 +75,9 @@ public class TitularService {
     }
 
     @Transactional(readOnly = true)
-    public List<Titular> listar(String cpf, String nomeCompleto, String cidade, StatusTitular status, String usuarioLogado) {
+    public Page<Titular> listar(String cpf, String nomeCompleto, String cidade, String tituloEleitor, StatusTitular status, Pageable pageable, String usuarioLogado) {
         String cpfDigits = cpf == null ? null : CpfValidator.somenteDigitos(cpf);
-        List<Titular> resultado = titularRepository.findAll(TitularSpecifications.filtrar(cpfDigits, nomeCompleto, cidade, status));
+        Page<Titular> resultado = titularRepository.findAll(TitularSpecifications.filtrar(cpfDigits, nomeCompleto, cidade, tituloEleitor, status), pageable);
         resultado.forEach(titular -> registrarAcesso(titular.getId(), usuarioLogado, "CONSULTA"));
         return resultado;
     }

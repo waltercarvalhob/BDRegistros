@@ -56,7 +56,18 @@ export interface TitularFiltro {
   cpf?: string;
   nomeCompleto?: string;
   cidade?: string;
+  tituloEleitor?: string;
   status?: StatusTitular | '';
+  page?: number;
+  size?: number;
+}
+
+export interface TitularPagina {
+  content: TitularResponse[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -69,7 +80,7 @@ export class TitularService {
     return this.http.post<TitularResponse>(this.baseUrl, payload);
   }
 
-  listar(filtro: TitularFiltro): Observable<TitularResponse[]> {
+  listar(filtro: TitularFiltro): Observable<TitularPagina> {
     let params = new HttpParams();
     if (filtro.cpf) {
       params = params.set('cpf', filtro.cpf.replace(/\D/g, ''));
@@ -80,10 +91,15 @@ export class TitularService {
     if (filtro.cidade) {
       params = params.set('cidade', filtro.cidade);
     }
+    if (filtro.tituloEleitor) {
+      params = params.set('tituloEleitor', filtro.tituloEleitor);
+    }
     if (filtro.status) {
       params = params.set('status', filtro.status);
     }
-    return this.http.get<TitularResponse[]>(this.baseUrl, { params });
+    params = params.set('page', String(filtro.page ?? 0));
+    params = params.set('size', String(filtro.size ?? 20));
+    return this.http.get<TitularPagina>(this.baseUrl, { params });
   }
 
   obter(id: string): Observable<TitularResponse> {
