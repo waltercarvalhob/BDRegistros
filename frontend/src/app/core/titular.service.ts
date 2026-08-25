@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export type StatusTitular = 'ATIVO' | 'INATIVO' | 'EXCLUIDO';
 
@@ -72,7 +73,7 @@ export interface TitularPagina {
 
 @Injectable({ providedIn: 'root' })
 export class TitularService {
-  private readonly baseUrl = '/api/titulares';
+  private readonly baseUrl = `${environment.apiBaseUrl}/api/titulares`;
 
   constructor(private readonly http: HttpClient) {}
 

@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export type Papel = 'ADMIN' | 'OPERADOR';
 
@@ -34,7 +35,7 @@ export interface UsuarioFiltro {
 
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {
-  private readonly baseUrl = '/api/usuarios';
+  private readonly baseUrl = `${environment.apiBaseUrl}/api/usuarios`;
 
   constructor(private readonly http: HttpClient) {}
 

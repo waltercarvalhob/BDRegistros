@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface LoginPayload {
   login: string;
@@ -24,7 +25,7 @@ export class AuthService {
 
   login(payload: LoginPayload): Observable<LoginResponse> {
     return this.http
-      .post<LoginResponse>('/api/auth/login', payload)
+      .post<LoginResponse>(`${environment.apiBaseUrl}/api/auth/login`, payload)
       .pipe(tap((resposta) => sessionStorage.setItem(TOKEN_KEY, resposta.token)));
   }
 
