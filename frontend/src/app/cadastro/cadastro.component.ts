@@ -12,6 +12,8 @@ import { TitularService } from '../core/titular.service';
   styleUrl: './cadastro.component.scss',
 })
 export class CadastroComponent {
+  private static readonly FINALIDADE_PADRAO = 'Cadastro de titulares';
+
   private readonly fb = inject(FormBuilder);
   private readonly titularService = inject(TitularService);
 
@@ -32,10 +34,8 @@ export class CadastroComponent {
     cidade: ['', Validators.required],
     estado: ['', [Validators.required, Validators.maxLength(2)]],
     cep: [''],
-    finalidadeConsentimento: ['', [Validators.required, Validators.maxLength(300)]],
     canalConsentimento: ['PRESENCIAL', Validators.required],
     agenteResponsavel: [''],
-    consentimentoConfirmado: [false, Validators.requiredTrue],
   });
 
   enviar(): void {
@@ -64,10 +64,10 @@ export class CadastroComponent {
           estado: v.estado!,
           cep: v.cep || undefined,
         },
-        finalidadeConsentimento: v.finalidadeConsentimento!,
+        finalidadeConsentimento: CadastroComponent.FINALIDADE_PADRAO,
         canalConsentimento: v.canalConsentimento as 'PRESENCIAL' | 'DIGITAL' | 'TELEFONE',
         agenteResponsavel: v.agenteResponsavel || undefined,
-        consentimentoConfirmado: !!v.consentimentoConfirmado,
+        consentimentoConfirmado: true,
       })
       .subscribe({
         next: () => {

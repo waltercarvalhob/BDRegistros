@@ -86,30 +86,9 @@
     </label>
   </fieldset>
 
-  <div class="consentimento">
-    <label>
-      Finalidade deste cadastro
-      <input
-        formControlName="finalidadeConsentimento"
-        type="text"
-        placeholder="Ex.: Cadastro de moradores do bairro X"
-      />
-      <span
-        class="campo-erro"
-        *ngIf="form.get('finalidadeConsentimento')?.touched && form.get('finalidadeConsentimento')?.invalid"
-      >
-        Informe a finalidade do cadastro.
-      </span>
-    </label>
-    <p>
-      Seus dados serao usados apenas para a finalidade informada acima e voce pode pedir a exclusao a qualquer
-      momento.
-    </p>
-    <label class="checkbox">
-      <input formControlName="consentimentoConfirmado" type="checkbox" />
-      Declaro que fui informado(a) sobre a finalidade da coleta destes dados e autorizo o seu uso para esse fim.
-    </label>
-  </div>
+  <p class="aviso-lgpd">
+    Seus dados serao usados apenas para este cadastro e voce pode pedir a exclusao a qualquer momento.
+  </p>
 
   <button type="submit" [disabled]="enviando">
     {{ enviando ? 'Enviando...' : 'Confirmar cadastro' }}
