@@ -1,24 +1,24 @@
 <div class="backup">
-  <header>
+  <header class="glass-card">
     <h1>Backup dos titulares</h1>
     <span *ngIf="usuarioLogado">{{ usuarioLogado.login }} ({{ usuarioLogado.papel }})</span>
   </header>
 
-  <section class="bloco">
+  <section class="bloco glass-card">
     <h2>Exportar</h2>
     <p>Gera um arquivo com todos os titulares cadastrados (nome, CPF, endereco e consentimento).</p>
     <div class="acoes">
-      <button type="button" [disabled]="exportando" (click)="exportar('csv')">
+      <button type="button" class="btn-primario" [disabled]="exportando" (click)="exportar('csv')">
         {{ exportando ? 'Gerando...' : 'Exportar CSV' }}
       </button>
-      <button type="button" [disabled]="exportando" (click)="exportar('xlsx')">
+      <button type="button" class="btn-primario" [disabled]="exportando" (click)="exportar('xlsx')">
         {{ exportando ? 'Gerando...' : 'Exportar Excel' }}
       </button>
     </div>
     <p class="mensagem-erro" *ngIf="erroExportacao">{{ erroExportacao }}</p>
   </section>
 
-  <section class="bloco">
+  <section class="bloco glass-card">
     <h2>Restaurar / importar</h2>
     <p>
       Envie um arquivo CSV, Excel ou Word no mesmo formato do exportado (no Word, uma tabela com
@@ -27,7 +27,7 @@
     </p>
     <div class="importar">
       <input type="file" accept=".csv,.xlsx,.docx" (change)="selecionarArquivo($event)" />
-      <button type="button" [disabled]="!arquivoSelecionado || importando" (click)="visualizar()">
+      <button type="button" class="btn-primario" [disabled]="!arquivoSelecionado || importando" (click)="visualizar()">
         {{ importando ? 'Analisando...' : 'Pre-visualizar' }}
       </button>
     </div>
@@ -45,7 +45,7 @@
       </p>
 
       <div class="acoes" *ngIf="resultado.dryRun">
-        <button type="button" [disabled]="importando" (click)="confirmar()">
+        <button type="button" class="btn-primario" [disabled]="importando" (click)="confirmar()">
           {{ importando ? 'Importando...' : 'Confirmar importacao' }}
         </button>
         <button type="button" [disabled]="importando" (click)="cancelarPreVisualizacao()">Cancelar</button>

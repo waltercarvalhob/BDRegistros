@@ -1,17 +1,17 @@
 .titulares {
-  max-width: 960px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 1.5rem;
 
   header {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
+    padding: 1.25rem 1.5rem;
 
     h1 {
       flex: 1;
-      font-size: 1.25rem;
+      font-size: 1.4rem;
       margin: 0;
     }
   }
@@ -21,32 +21,8 @@
     flex-wrap: wrap;
     align-items: flex-end;
     gap: 0.75rem;
-    margin-bottom: 1rem;
-  }
-
-  label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    font-size: 0.9rem;
-  }
-
-  input,
-  select {
-    padding: 0.5rem;
-    font-size: 1rem;
-  }
-
-  button,
-  .botao-secundario {
-    padding: 0.6rem 1rem;
-    font-size: 1rem;
-    cursor: pointer;
-    text-decoration: none;
-    color: inherit;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: #fff;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
   }
 
   .form-titular {
@@ -54,11 +30,8 @@
     flex-direction: column;
     gap: 0.75rem;
     max-width: 520px;
-    padding: 1rem;
+    padding: 1.5rem;
     margin-bottom: 1.5rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background: #fff;
 
     h2 {
       margin: 0 0 0.5rem;
@@ -69,8 +42,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-      border: 1px solid #eee;
-      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.35);
     }
   }
 
@@ -79,31 +51,15 @@
     gap: 0.5rem;
   }
 
-  .campo-erro,
+  .mensagem-sucesso,
   .mensagem-erro {
-    color: #c62828;
-    font-size: 0.85rem;
+    margin: 0 0 1rem;
   }
 
-  .mensagem-sucesso {
-    color: #2e7d32;
-    font-size: 0.9rem;
-  }
-
-  .lista {
-    width: 100%;
-    border-collapse: collapse;
-
-    th,
-    td {
-      text-align: left;
-      padding: 0.5rem 0.6rem;
-      border-bottom: 1px solid #ddd;
-    }
-
-    th {
-      color: #555;
-    }
+  .tabela-wrap {
+    padding: 0.5rem 1.5rem;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
 
     .acoes {
       display: flex;
@@ -112,15 +68,12 @@
   }
 
   .importacao {
-    padding: 1rem;
+    padding: 1.5rem;
     margin-bottom: 1.5rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background: #fff;
 
     h2 {
       margin-top: 0;
-      font-size: 1.05rem;
+      font-size: 1.1rem;
     }
 
     .importar,
@@ -137,15 +90,11 @@
 
     .erros {
       width: 100%;
-      border-collapse: collapse;
       margin-top: 0.5rem;
 
       th,
       td {
-        text-align: left;
-        padding: 0.4rem 0.6rem;
-        border-bottom: 1px solid #ddd;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
       }
     }
   }

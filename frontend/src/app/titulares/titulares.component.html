@@ -1,10 +1,10 @@
 <div class="titulares">
-  <header>
+  <header class="glass-card">
     <h1>Titulares</h1>
     <span *ngIf="usuarioLogado">{{ usuarioLogado.login }} ({{ usuarioLogado.papel }})</span>
   </header>
 
-  <form class="filtro" [formGroup]="filtroForm" (ngSubmit)="buscar()">
+  <form class="filtro glass-card" [formGroup]="filtroForm" (ngSubmit)="buscar()">
     <label>
       CPF
       <input formControlName="cpf" type="text" inputmode="numeric" placeholder="000.000.000-00" />
@@ -32,7 +32,7 @@
     </label>
     <button type="submit" [disabled]="buscando">{{ buscando ? 'Pesquisando...' : 'Pesquisar' }}</button>
     <a routerLink="/" class="botao-secundario">Novo cadastro</a>
-    <button type="button" *ngIf="usuarioLogado?.papel === 'ADMIN'" (click)="abrirImportacao()">
+    <button type="button" class="btn-primario" *ngIf="usuarioLogado?.papel === 'ADMIN'" (click)="abrirImportacao()">
       Importar arquivo
     </button>
   </form>
@@ -40,7 +40,7 @@
   <p class="mensagem-sucesso" *ngIf="sucesso">{{ sucesso }}</p>
   <p class="mensagem-erro" *ngIf="erro">{{ erro }}</p>
 
-  <section class="importacao" *ngIf="mostrarImportacao">
+  <section class="importacao glass-card" *ngIf="mostrarImportacao">
     <h2>Importar titulares de um arquivo</h2>
     <p>
       Envie um arquivo CSV, Excel ou Word no mesmo formato do exportado em Backup (no Word, uma tabela
@@ -49,7 +49,7 @@
     </p>
     <div class="importar">
       <input type="file" accept=".csv,.xlsx,.docx" (change)="selecionarArquivo($event)" />
-      <button type="button" [disabled]="!arquivoSelecionado || importando" (click)="visualizarImportacao()">
+      <button type="button" class="btn-primario" [disabled]="!arquivoSelecionado || importando" (click)="visualizarImportacao()">
         {{ importando ? 'Analisando...' : 'Pre-visualizar' }}
       </button>
       <button type="button" [disabled]="importando" (click)="fecharImportacao()">Fechar</button>
@@ -69,7 +69,7 @@
       </p>
 
       <div class="acoes" *ngIf="resultadoImportacao.dryRun">
-        <button type="button" [disabled]="importando" (click)="confirmarImportacao()">
+        <button type="button" class="btn-primario" [disabled]="importando" (click)="confirmarImportacao()">
           {{ importando ? 'Importando...' : 'Confirmar importacao' }}
         </button>
       </div>
@@ -91,7 +91,7 @@
     </div>
   </section>
 
-  <form class="form-titular" *ngIf="mostrarForm" [formGroup]="form" (ngSubmit)="salvar()">
+  <form class="form-titular glass-card" *ngIf="mostrarForm" [formGroup]="form" (ngSubmit)="salvar()">
     <h2>Editar titular</h2>
 
     <label>
@@ -155,33 +155,35 @@
     </div>
   </form>
 
-  <table class="lista" *ngIf="titulares.length">
-    <thead>
-      <tr>
-        <th>Nome</th>
-        <th>CPF</th>
-        <th>Titulo de eleitor</th>
-        <th>Telefone</th>
-        <th>Cidade/UF</th>
-        <th>Status</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let titular of titulares">
-        <td>{{ titular.nomeCompleto }}</td>
-        <td>{{ titular.cpf }}</td>
-        <td>{{ titular.tituloEleitor || '-' }}</td>
-        <td>{{ titular.telefone }}</td>
-        <td>{{ titular.cidade }}/{{ titular.estado }}</td>
-        <td>{{ titular.status }}</td>
-        <td class="acoes">
-          <button type="button" (click)="abrirEdicao(titular)">Editar</button>
-          <button type="button" (click)="excluir(titular)" [disabled]="titular.status === 'EXCLUIDO'">Excluir</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="tabela-wrap glass-card" *ngIf="titulares.length">
+    <table class="lista">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>CPF</th>
+          <th>Titulo de eleitor</th>
+          <th>Telefone</th>
+          <th>Cidade/UF</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let titular of titulares">
+          <td>{{ titular.nomeCompleto }}</td>
+          <td>{{ titular.cpf }}</td>
+          <td>{{ titular.tituloEleitor || '-' }}</td>
+          <td>{{ titular.telefone }}</td>
+          <td>{{ titular.cidade }}/{{ titular.estado }}</td>
+          <td>{{ titular.status }}</td>
+          <td class="acoes">
+            <button type="button" (click)="abrirEdicao(titular)">Editar</button>
+            <button type="button" class="btn-perigo" (click)="excluir(titular)" [disabled]="titular.status === 'EXCLUIDO'">Excluir</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <p *ngIf="jaBuscou && !buscando && !titulares.length">Nenhum titular encontrado para os filtros informados.</p>
 

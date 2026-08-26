@@ -1,17 +1,28 @@
 <nav class="nav">
-  <a routerLink="/">Cadastro</a>
+  <a routerLink="/" class="marca">
+    <span class="marca-badge">BD</span>
+    <span class="marca-texto">
+      <strong>BDRegistros</strong>
+    </span>
+  </a>
 
-  <ng-container *ngIf="authService.isAuthenticated(); else entrar">
-    <a routerLink="/titulares">Titulares</a>
-    <ng-container *ngIf="isAdmin">
-      <a routerLink="/usuarios">Usuarios</a>
-      <a routerLink="/backup">Backup</a>
+  <div class="nav-links">
+    <a routerLink="/">Cadastro</a>
+
+    <ng-container *ngIf="authService.isAuthenticated(); else entrar">
+      <a routerLink="/titulares">Titulares</a>
+      <ng-container *ngIf="isAdmin">
+        <a routerLink="/usuarios">Usuarios</a>
+        <a routerLink="/backup">Backup</a>
+      </ng-container>
+      <button type="button" class="btn-sair" (click)="sair()">Sair</button>
     </ng-container>
-    <button type="button" (click)="sair()">Sair</button>
-  </ng-container>
-  <ng-template #entrar>
-    <a routerLink="/login">Entrar</a>
-  </ng-template>
+    <ng-template #entrar>
+      <a routerLink="/login" class="btn-entrar">Entrar</a>
+    </ng-template>
+  </div>
 </nav>
 
-<router-outlet></router-outlet>
+<main class="conteudo">
+  <router-outlet></router-outlet>
+</main>
