@@ -85,7 +85,7 @@ public class TitularImportRowService {
 
     private Titular criar(String cpf, Map<String, String> valores) {
         String nomeCompleto = obrigatorio(valores, "nomeCompleto");
-        String telefone = obrigatorio(valores, "telefone");
+        String telefone = valor(valores, "telefone");
         String logradouro = obrigatorio(valores, "logradouro");
         String bairro = obrigatorio(valores, "bairro");
         String cidade = obrigatorio(valores, "cidade");
@@ -106,7 +106,7 @@ public class TitularImportRowService {
         titular.setNomeCompleto(nomeCompleto);
         titular.setCpf(cpf);
         titular.setTituloEleitor(vazioParaNulo(valor(valores, "tituloEleitor")));
-        titular.setTelefone(telefone);
+        titular.setTelefone(vazioParaNulo(telefone));
         titular.setDataNascimento(parseData(valor(valores, "dataNascimento")));
         String statusRaw = valor(valores, "status");
         if (!statusRaw.isBlank()) {

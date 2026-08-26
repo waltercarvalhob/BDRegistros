@@ -25,7 +25,6 @@ public class TitularCadastroRequest {
 
     private String tituloEleitor;
 
-    @NotBlank
     private String telefone;
 
     private LocalDate dataNascimento;
