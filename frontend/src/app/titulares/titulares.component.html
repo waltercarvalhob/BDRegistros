@@ -31,7 +31,7 @@
       </select>
     </label>
     <button type="submit" [disabled]="buscando">{{ buscando ? 'Pesquisando...' : 'Pesquisar' }}</button>
-    <a routerLink="/" class="botao-secundario">Novo cadastro</a>
+    <a routerLink="/" class="btn-primario">Novo cadastro</a>
     <button type="button" class="btn-primario" *ngIf="usuarioLogado?.papel === 'ADMIN'" (click)="abrirImportacao()">
       Importar arquivo
     </button>
