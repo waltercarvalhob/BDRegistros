@@ -21,11 +21,12 @@
   <section class="bloco">
     <h2>Restaurar / importar</h2>
     <p>
-      Envie um arquivo CSV ou Excel no mesmo formato do exportado. Titulares com CPF ja cadastrado sao
-      atualizados; CPFs novos sao criados (exigem os campos de consentimento preenchidos).
+      Envie um arquivo CSV, Excel ou Word no mesmo formato do exportado (no Word, uma tabela com
+      cabecalho na primeira linha). Titulares com CPF ja cadastrado sao atualizados; CPFs novos sao
+      criados (exigem os campos de consentimento preenchidos).
     </p>
     <div class="importar">
-      <input type="file" accept=".csv,.xlsx" (change)="selecionarArquivo($event)" />
+      <input type="file" accept=".csv,.xlsx,.docx" (change)="selecionarArquivo($event)" />
       <button type="button" [disabled]="!arquivoSelecionado || importando" (click)="visualizar()">
         {{ importando ? 'Analisando...' : 'Pre-visualizar' }}
       </button>

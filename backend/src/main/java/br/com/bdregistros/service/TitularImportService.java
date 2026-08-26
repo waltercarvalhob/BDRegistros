@@ -11,6 +11,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,8 +30,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Le o arquivo de restauracao (CSV ou XLSX, mesmo layout gerado por
- * TitularExportService) e delega o upsert de cada linha, em transacoes
+ * Le o arquivo de restauracao (CSV, XLSX ou DOCX, mesmo layout gerado por
+ * TitularExportService - no DOCX o layout e uma tabela com cabecalho na
+ * primeira linha) e delega o upsert de cada linha, em transacoes
  * independentes, para TitularImportRowService.
  */
 @Service
@@ -42,7 +46,11 @@ public class TitularImportService {
 
     public ImportResultadoResponse importar(MultipartFile file, String formatoParam, String usuarioLogado, boolean dryRun) {
         String formato = resolverFormato(file, formatoParam);
-        List<LinhaImportacao> linhas = "csv".equals(formato) ? lerCsv(file) : lerXlsx(file);
+        List<LinhaImportacao> linhas = switch (formato) {
+            case "csv" -> lerCsv(file);
+            case "xlsx" -> lerXlsx(file);
+            default -> lerDocx(file);
+        };
 
         int criados = 0;
         int atualizados = 0;
@@ -67,10 +75,10 @@ public class TitularImportService {
     private String resolverFormato(MultipartFile file, String formatoParam) {
         if (formatoParam != null && !formatoParam.isBlank()) {
             String normalizado = formatoParam.trim().toLowerCase();
-            if (normalizado.equals("csv") || normalizado.equals("xlsx")) {
+            if (normalizado.equals("csv") || normalizado.equals("xlsx") || normalizado.equals("docx")) {
                 return normalizado;
             }
-            throw new IllegalArgumentException("Formato invalido: " + formatoParam + " (use csv ou xlsx).");
+            throw new IllegalArgumentException("Formato invalido: " + formatoParam + " (use csv, xlsx ou docx).");
         }
         String nome = file.getOriginalFilename();
         if (nome != null) {
@@ -81,8 +89,11 @@ public class TitularImportService {
             if (lower.endsWith(".xlsx")) {
                 return "xlsx";
             }
+            if (lower.endsWith(".docx")) {
+                return "docx";
+            }
         }
-        throw new IllegalArgumentException("Nao foi possivel determinar o formato do arquivo; envie .csv ou .xlsx.");
+        throw new IllegalArgumentException("Nao foi possivel determinar o formato do arquivo; envie .csv, .xlsx ou .docx.");
     }
 
     private List<LinhaImportacao> lerCsv(MultipartFile file) {
@@ -138,6 +149,49 @@ public class TitularImportService {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private List<LinhaImportacao> lerDocx(MultipartFile file) {
+        try (InputStream in = file.getInputStream(); XWPFDocument documento = new XWPFDocument(in)) {
+            if (documento.getTables().isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Documento Word sem tabela: insira uma tabela com o mesmo layout do CSV/Excel exportado (cabecalho na primeira linha).");
+            }
+            List<XWPFTableRow> linhasTabela = documento.getTables().get(0).getRows();
+            if (linhasTabela.isEmpty()) {
+                throw new IllegalArgumentException("Tabela vazia: nenhum cabecalho encontrado.");
+            }
+
+            List<String> colunas = new ArrayList<>();
+            for (XWPFTableCell celula : linhasTabela.get(0).getTableCells()) {
+                colunas.add(celula.getText().trim());
+            }
+
+            List<LinhaImportacao> linhas = new ArrayList<>();
+            for (int i = 1; i < linhasTabela.size(); i++) {
+                List<XWPFTableCell> celulas = linhasTabela.get(i).getTableCells();
+                if (linhaVaziaDocx(celulas)) {
+                    continue;
+                }
+                Map<String, String> valores = new LinkedHashMap<>();
+                for (int c = 0; c < colunas.size(); c++) {
+                    valores.put(colunas.get(c), c < celulas.size() ? celulas.get(c).getText().trim() : "");
+                }
+                linhas.add(new LinhaImportacao(i + 1, valores));
+            }
+            return linhas;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private boolean linhaVaziaDocx(List<XWPFTableCell> celulas) {
+        for (XWPFTableCell celula : celulas) {
+            if (!celula.getText().trim().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean linhaVazia(Row row, DataFormatter formatter) {
