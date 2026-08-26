@@ -148,7 +148,7 @@ export class UsuariosComponent {
   private tratarErroSessao(resposta: any, aplicar: (mensagem: string) => void): void {
     this.carregando = false;
     this.salvando = false;
-    if (resposta?.status === 401) {
+    if (resposta?.status === 401 || resposta?.status === 403) {
       this.authService.logout();
       this.router.navigate(['/login']);
       return;

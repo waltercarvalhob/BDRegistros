@@ -38,7 +38,7 @@ export class BackupComponent {
       },
       error: (resposta) => {
         this.exportando = false;
-        if (resposta?.status === 401) {
+        if (resposta?.status === 401 || resposta?.status === 403) {
           this.authService.logout();
           this.router.navigate(['/login']);
           return;
@@ -86,7 +86,7 @@ export class BackupComponent {
       error: (resposta) => {
         this.importando = false;
         this.resultado = null;
-        if (resposta?.status === 401) {
+        if (resposta?.status === 401 || resposta?.status === 403) {
           this.authService.logout();
           this.router.navigate(['/login']);
           return;
