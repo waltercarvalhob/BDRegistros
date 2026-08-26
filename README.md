@@ -103,17 +103,24 @@ publico.
 ## Hospedagem (Render)
 
 O projeto e hospedado no Render como dois servicos separados, descritos em
-`render.yaml` na raiz (usado como referencia/Blueprint):
+`render.yaml` na raiz (usado como referencia/Blueprint; os nomes reais dos
+servicos ja em producao podem ter um sufixo aleatorio que o Render adiciona
+quando o nome pedido ja esta em uso por outra conta):
 
-- **Backend** (`bdregistros-backend`): servico Web com `runtime: docker`,
-  construido a partir de `backend/Dockerfile` (multi-stage: build com Maven
-  + imagem final so com o JRE). Expoe `GET /health` sem autenticacao,
-  usado como `healthCheckPath` pelo Render.
-- **Frontend** (`bdregistros-frontend`): Static Site (`npm install && npm
-  run build`, publica `dist/bdregistros/browser`). O `render.yaml`
-  configura dois rewrites: `/api/*` para a URL publica do backend, e
-  `/*` para `/index.html` (necessario para as rotas client-side do
-  Angular Router funcionarem em recarregamento direto).
+- **Backend** (real: `registro-backend-s5ab`,
+  https://registro-backend-s5ab.onrender.com): servico Web com
+  `runtime: docker`, construido a partir de `backend/Dockerfile`
+  (multi-stage: build com Maven + imagem final so com o JRE). Expoe
+  `GET /health` sem autenticacao, usado como `healthCheckPath` pelo Render.
+- **Frontend** (real: `bdregistros`, https://bdregistros.onrender.com):
+  Static Site (`npm install && npm run build`, publica
+  `dist/bdregistros/browser`). O `render.yaml` configura dois rewrites:
+  `/api/*` para a URL publica do backend, e `/*` para `/index.html`
+  (necessario para as rotas client-side do Angular Router funcionarem em
+  recarregamento direto). Na pratica o rewrite de `/api/*` nao faz proxy
+  reverso completo (POST retornava 200 vazio) — o frontend chama o backend
+  direto por URL absoluta (`frontend/src/environments/environment.prod.ts`),
+  entao esse rewrite e o `frontend/src/_redirects` ficaram vestigiais.
 - **Banco de dados:** Postgres gerenciado no Render.
 
 Variaveis de ambiente do servico de backend (alem de `JWT_SECRET` e
@@ -125,7 +132,11 @@ Variaveis de ambiente do servico de backend (alem de `JWT_SECRET` e
 - `ADMIN_LOGIN`, `ADMIN_PASSWORD`: bootstrap do primeiro administrador
   (so tem efeito se a tabela `usuario` estiver vazia).
 - `FRONTEND_ORIGIN`: URL publica do servico de frontend (Static Site),
-  para o CORS aceitar as chamadas de `/api/**`.
+  para o CORS aceitar as chamadas de `/api/**`. Precisa bater exatamente
+  com a origem do frontend (`https://bdregistros.onrender.com`, sem barra
+  no final) — o `SecurityConfig` so libera essa unica origem, sem
+  wildcard. Se estiver ausente ou divergente, toda chamada do frontend
+  falha com `403 Invalid CORS request` (visivel no preflight `OPTIONS`).
 
 Se os servicos ja existirem no Render conectados a outro repositorio,
 repita o repositorio conectado (Settings > Build & Deploy) para

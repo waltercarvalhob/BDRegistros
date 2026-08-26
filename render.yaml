@@ -1,6 +1,11 @@
+# Nomes/URLs abaixo refletem os servicos reais no Render (o nome pedido no
+# blueprint pode ganhar um sufixo aleatorio do Render se ja estiver em uso
+# por outra conta - foi o caso do backend, que subiu como
+# registro-backend-s5ab.onrender.com). Confirme os nomes reais em cada
+# servico (Settings > General) antes de reaplicar este blueprint.
 services:
   - type: web
-    name: bdregistros-backend
+    name: registro-backend
     runtime: docker
     rootDir: backend
     dockerfilePath: ./Dockerfile
@@ -28,15 +33,22 @@ services:
         sync: false
 
   - type: web
-    name: bdregistros-frontend
+    name: bdregistros
     runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist/bdregistros/browser
     routes:
+      # O rewrite de /api/* para uma URL externa nao faz proxy reverso
+      # completo no Render (POST retornava 200 vazio, sem repassar corpo/
+      # resposta do backend real) - por isso o frontend chama o backend
+      # direto por URL absoluta (frontend/src/environments/environment.prod.ts)
+      # em vez de depender deste rewrite. Mantido so por completude do
+      # blueprint; o arquivo que efetivamente importa em build e
+      # frontend/src/_redirects, que tambem esta vestigial pelo mesmo motivo.
       - type: rewrite
         source: /api/*
-        destination: https://bdregistros-backend.onrender.com/api/*
+        destination: https://registro-backend-s5ab.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html
