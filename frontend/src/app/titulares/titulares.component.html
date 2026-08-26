@@ -4,7 +4,7 @@
     <span *ngIf="usuarioLogado">{{ usuarioLogado.login }} ({{ usuarioLogado.papel }})</span>
   </header>
 
-  <form class="filtro glass-card" [formGroup]="filtroForm" (ngSubmit)="buscar()">
+  <form class="filtro glass-card" *ngIf="!mostrarForm" [formGroup]="filtroForm" (ngSubmit)="buscar()">
     <label>
       CPF
       <input formControlName="cpf" type="text" inputmode="numeric" placeholder="000.000.000-00" />
@@ -40,7 +40,7 @@
   <p class="mensagem-sucesso" *ngIf="sucesso">{{ sucesso }}</p>
   <p class="mensagem-erro" *ngIf="erro">{{ erro }}</p>
 
-  <section class="importacao glass-card" *ngIf="mostrarImportacao">
+  <section class="importacao glass-card" *ngIf="mostrarImportacao && !mostrarForm">
     <h2>Importar titulares de um arquivo</h2>
     <p>
       Envie um arquivo CSV, Excel ou Word no mesmo formato do exportado em Backup (no Word, uma tabela
@@ -93,6 +93,11 @@
 
   <form class="form-titular glass-card" *ngIf="mostrarForm" [formGroup]="form" (ngSubmit)="salvar()">
     <h2>Editar titular</h2>
+
+    <label>
+      CPF
+      <input type="text" [value]="editando?.cpf" disabled />
+    </label>
 
     <label>
       Nome completo
@@ -155,41 +160,43 @@
     </div>
   </form>
 
-  <div class="tabela-wrap glass-card" *ngIf="titulares.length">
-    <table class="lista">
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>CPF</th>
-          <th>Titulo de eleitor</th>
-          <th>Telefone</th>
-          <th>Cidade/UF</th>
-          <th>Status</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let titular of titulares">
-          <td>{{ titular.nomeCompleto }}</td>
-          <td>{{ titular.cpf }}</td>
-          <td>{{ titular.tituloEleitor || '-' }}</td>
-          <td>{{ titular.telefone }}</td>
-          <td>{{ titular.cidade }}/{{ titular.estado }}</td>
-          <td>{{ titular.status }}</td>
-          <td class="acoes">
-            <button type="button" (click)="abrirEdicao(titular)">Editar</button>
-            <button type="button" class="btn-perigo" (click)="excluir(titular)" [disabled]="titular.status === 'EXCLUIDO'">Excluir</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <ng-container *ngIf="!mostrarForm">
+    <div class="tabela-wrap glass-card" *ngIf="titulares.length">
+      <table class="lista">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Titulo de eleitor</th>
+            <th>Telefone</th>
+            <th>Cidade/UF</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let titular of titulares">
+            <td>{{ titular.nomeCompleto }}</td>
+            <td>{{ titular.cpf }}</td>
+            <td>{{ titular.tituloEleitor || '-' }}</td>
+            <td>{{ titular.telefone }}</td>
+            <td>{{ titular.cidade }}/{{ titular.estado }}</td>
+            <td>{{ titular.status }}</td>
+            <td class="acoes">
+              <button type="button" (click)="abrirEdicao(titular)">Editar</button>
+              <button type="button" class="btn-perigo" (click)="excluir(titular)" [disabled]="titular.status === 'EXCLUIDO'">Excluir</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-  <p *ngIf="jaBuscou && !buscando && !titulares.length">Nenhum titular encontrado para os filtros informados.</p>
+      <nav class="paginacao" *ngIf="totalPaginas > 1">
+        <button type="button" [disabled]="pagina === 0 || buscando" (click)="irParaPagina(pagina - 1)">Anterior</button>
+        <span>Pagina {{ pagina + 1 }} de {{ totalPaginas }} ({{ totalElementos }} titular(es))</span>
+        <button type="button" [disabled]="pagina >= totalPaginas - 1 || buscando" (click)="irParaPagina(pagina + 1)">Proxima</button>
+      </nav>
+    </div>
 
-  <nav class="paginacao" *ngIf="totalPaginas > 1">
-    <button type="button" [disabled]="pagina === 0 || buscando" (click)="irParaPagina(pagina - 1)">Anterior</button>
-    <span>Pagina {{ pagina + 1 }} de {{ totalPaginas }} ({{ totalElementos }} titular(es))</span>
-    <button type="button" [disabled]="pagina >= totalPaginas - 1 || buscando" (click)="irParaPagina(pagina + 1)">Proxima</button>
-  </nav>
+    <p *ngIf="jaBuscou && !buscando && !titulares.length">Nenhum titular encontrado para os filtros informados.</p>
+  </ng-container>
 </div>
